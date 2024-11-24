@@ -1,0 +1,71 @@
+name: Build and Publish Android Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04  # Specify a fixed version of Ubuntu
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Free Disk Space Before Build
+      run: |
+        echo "Disk space before cleanup:"
+        df -h
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo rm -rf /usr/local/lib/android/sdk/ndk
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo apt-get clean
+        echo "Disk space after cleanup:"
+        df -h
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y your-required-packages
+
+    - name: Cache Gradle files
+      uses: actions/cache@v3
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Build the Android project
+      run: ./gradlew build
+
+    - name: Publish to Firebase App Distribution
+      run: |
+        # Your commands to publish the build to Firebase
+
+    - name: Free Disk Space After Build
+      run: |
+        echo "Disk space before post-build cleanup:"
+        df -h
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo rm -rf /usr/local/lib/android/sdk/ndk
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /usr/local/share/boost
+        sudo apt-get clean
+        echo "Disk space after post-build cleanup:"
+        df -h
